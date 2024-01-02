@@ -1,0 +1,24 @@
+---
+
+- name: Download the ISO image
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ management_server_iso_location }}/{{ item.url | basename }}"
+    checksum: "{{ item.checksum }}"
+    tmp_dest: "{{ management_server_iso_location }}"
+  loop: "{{ vm_templates }}"
+
+- name: Copy file into datastore
+  community.vmware.vsphere_copy:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    src: "{{ management_server_iso_location }}/{{ item.url | basename }}"
+    datastore: "{{ vm_datastore }}"
+    path: "{{ vm_datastore_path }}/{{ item.url | basename }}"
+  loop: "{{ vm_templates }}"

@@ -1,0 +1,30 @@
+---
+
+- name: Push vendor image w/ autoinstall activated to VMware datastore
+  community.vmware.vsphere_copy:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    src: "{{ management_server_iso_location }}/{{ autoinstall_iso_file_custom | basename }}"
+    datastore: "{{ vm_datastore }}"
+    path: "{{ vm_datastore_path }}/{{ autoinstall_iso_file_custom | basename }}"
+  when: autoinstall_update_vendor_iso | bool
+
+- name: Push autoinstall iso to VMware datastore
+  community.vmware.vsphere_copy:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    src: "{{ management_server_autoinstall_location }}/{{ autoinstall_path | basename }}"
+    datastore: "{{ vm_datastore }}"
+    path: "{{ vm_datastore_path_ai }}/{{ autoinstall_path | basename }}"

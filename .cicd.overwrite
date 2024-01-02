@@ -1,0 +1,13 @@
+---
+
+# Generic
+generic:
+  role: ansible-role-vmware
+  role_short: vmware
+  role_description: |
+    Manage VMWare resources like templates, vms etc
+  collections: []
+
+molecule:
+  requirements:
+    roles_extra: []

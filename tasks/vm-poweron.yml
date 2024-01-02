@@ -1,0 +1,21 @@
+---
+
+- name: Power-on the VM
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ http_proxy_ip | default(omit) }}"
+    proxy_port: "{{ http_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: poweredon
+
+- name: Wait for VM to be responsive
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[vm_name]['ansible_host'] }}"
+    port: 22
+  when: jumphost is undefined

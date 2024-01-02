@@ -1,0 +1,46 @@
+---
+
+# - name: Include tasks from vendor-iso-upload.yml
+#   ansible.builtin.include_tasks: vendor-iso-upload.yml
+
+- name: Include tasks from vm-destroy.yml
+  ansible.builtin.include_tasks: vm-destroy.yml
+  when: vm_destroy | bool
+
+# - name: Upload custom vendor iso
+#   ansible.builtin.include_tasks: iso-upload.yml
+#   vars:
+#     vmware_iso_file: "{{ management_server_iso_location }}/{{ autoinstall_iso_file_custom | basename }}"
+#     vmware_iso_ds_name: "{{ vm_datastore }}"
+#     vmware_iso_ds_path: "{{ vm_datastore_path }}/{{ autoinstall_iso_file_custom | basename }}"
+#   when: vm_iso_upload | bool
+
+- name: Upload autoinstall iso
+  ansible.builtin.include_tasks: iso-upload.yml
+  vars:
+    vmware_iso_file: "{{ management_server_autoinstall_location }}/{{ autoinstall_path | basename }}"
+    vmware_iso_ds_name: "{{ vm_datastore }}"
+    vmware_iso_ds_path: "{{ vm_datastore_path_ai }}/{{ autoinstall_path | basename }}"
+  when: vm_iso_type == 'autoinstall'
+
+- name: Upload kickstart iso
+  ansible.builtin.include_tasks: iso-upload.yml
+  vars:
+    vmware_iso_file: "{{ management_server_kickstart_location }}/{{ kickstart_hostname }}-ks.iso"
+    vmware_iso_ds_name: "{{ vm_datastore }}"
+    vmware_iso_ds_path: "{{ vm_datastore_path_ks }}/{{ kickstart_hostname }}-ks.iso"
+  when: vm_iso_type == 'kickstart'
+
+- name: Create VM
+  when: vm_create | bool
+  block:
+
+    - name: Include tasks from vm-create.yml
+      ansible.builtin.include_tasks: vm-create.yml
+
+    - name: Include tasks from vm-deploy-from-iso.yml
+      ansible.builtin.include_tasks: vm-deploy-from-iso.yml
+
+- name: Convert VM into template
+  ansible.builtin.include_tasks: vm-to-template.yml
+  when: vm_template | bool

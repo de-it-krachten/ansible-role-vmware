@@ -1,0 +1,153 @@
+---
+
+- name: Show ISO images
+  ansible.builtin.debug:
+    msg:
+      vm_iso_image1: "{{ vm_iso_image1 }}"
+      vm_iso_image2: "{{ vm_iso_image2 }}"
+#    verbosity: 1
+
+- name: Power-off VM
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: poweredoff
+
+- name: Connect ISO image
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: present
+    cdrom:
+      - type: iso
+        iso_path: "{{ vm_iso_image1 }}"
+        controller_type: ide
+        controller_number: 0
+        unit_number: 0
+      - type: iso
+        iso_path: "{{ vm_iso_image2 }}"
+        controller_type: ide
+        controller_number: 1
+        unit_number: 0
+
+- name: Change boot order to use cdrom first
+  community.vmware.vmware_guest_boot_manager:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    name: "{{ vm_name }}"
+    boot_delay: 10000
+    boot_order:
+      - cdrom
+
+- name: Power-on the VM
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: poweredon
+
+- name: Show information
+  ansible.builtin.debug:
+    msg:
+      - "Installation has been started."
+      - "When the installation finishes, the VM will be shutdown automatically."
+
+- name: Wait for VM to be poweredoff
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+  register: vm_status
+  until: vm_status.instance.hw_power_status == "poweredOff"
+  retries: 180
+  delay: 10
+
+- name: Change boot order back to disk
+  community.vmware.vmware_guest_boot_manager:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    name: "{{ vm_name }}"
+    boot_delay: 0
+    boot_order:
+      - disk
+
+- name: Disconnect ISO images and remove 2nd DVD
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: present
+    cdrom:
+      - type: none
+        controller_type: ide
+        controller_number: 0
+        unit_number: 0
+      - type: none
+        controller_type: ide
+        controller_number: 1
+        unit_number: 0
+        state: absent
+
+- name: Power-on the VM
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    name: "{{ vm_name }}"
+    state: poweredon
+  when: vm_startup | bool

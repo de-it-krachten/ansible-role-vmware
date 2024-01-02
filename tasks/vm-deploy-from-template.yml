@@ -1,0 +1,28 @@
+---
+
+- name: Deploy VM from template
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    cluster: "{{ vm_cluster | default(omit) }}"
+    name: "{{ vm_name }}"
+    folder: "{{ vm_folder }}"
+    template: "{{ vm_template }}"
+
+    disks: "{{ vm_settings['disk'] | default(omit) }}"
+    hardware:
+      hotadd_cpu: true
+      hotadd_memory: true
+      memory_mb: "{{ vm_memory | default(4096) }}"
+      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) }}"
+      num_cpus: "{{ vm_cpu | default(2) }}"
+#    networks:
+#      - start_connected: true
+#        name: "{{ vm_portgroup }}"
