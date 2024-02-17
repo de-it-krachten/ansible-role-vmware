@@ -18,3 +18,4 @@
   ansible.builtin.wait_for:
     host: "{{ vm_ip }}"
     port: 22
+    timeout: 600

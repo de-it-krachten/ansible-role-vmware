@@ -1,31 +1,7 @@
 ---
 
-- name: Show settings
-  ansible.builtin.debug:
-    verbosity: 1
-    msg:
-      customization:
-        dns_servers: "{{ vm_dns_servers | default(omit) }}"
-        dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-        domain: "{{ vm_domain | default(omit) }}"
-      disk: "{{ vm_settings['disk'] | default(omit) }}"
-      hardware:
-        hotadd_cpu: true
-        hotadd_memory: true
-        memory_mb: "{{ vm_memory | default(4096) | int }}"
-        num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
-        num_cpus: "{{ vm_cpu | default(2) | int }}"
-      networks:
-        - start_connected: true
-          connected: true
-          name: "{{ vm_portgroup | default(omit) }}"
-          ip: "{{ vm_ip | default(omit) }}"
-          netmask: "{{ vm_netmask | default(omit) }}"
-          gateway: "{{ vm_gateway | default(omit) }}"
-          mac: "{{ vm_mac | default(omit) }}"
-
 - name: Deploy VM from template
-  throttle: 1
+  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -41,21 +17,14 @@
     folder: "{{ vm_folder }}"
     template: "{{ vm_template }}"
 
-    cdrom:
-      - type: none
-        controller_type: ide
-        controller_number: 0
-        unit_number: 0
-        state: absent
-      - type: none
-        controller_type: ide
-        controller_number: 1
-        unit_number: 0
-        state: absent
+    cdrom: []
     customization:
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
       domain: "{{ vm_domain | default(omit) }}"
+      existing_vm: "{{ vm_customization | default(False) }}"
+      hostname: "{{ vm_hostname | default(omit) }}"
+    datastore: "{{ vm_settings['datastore'] | default(omit) }}"
     disk: "{{ vm_settings['disk'] | default(omit) }}"
     hardware:
       hotadd_cpu: true
@@ -77,8 +46,8 @@
   ansible.builtin.pause:
     seconds: 15
 
-- name: Reconfigure networking
-  throttle: 1
+- name: Reconfigure disk / networking / customization
+  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -97,6 +66,8 @@
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
       domain: "{{ vm_domain | default(omit) }}"
+      existing_vm: "{{ vm_customization | default(False) }}"
+      hostname: "{{ vm_hostname | default(omit) }}"
     networks:
       - start_connected: true
         connected: true
