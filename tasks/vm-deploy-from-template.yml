@@ -25,7 +25,7 @@
           mac: "{{ vm_mac | default(omit) }}"
 
 - name: Deploy VM from template
-  throttle: 1
+  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -41,17 +41,7 @@
     folder: "{{ vm_folder }}"
     template: "{{ vm_template }}"
 
-    cdrom:
-      - type: none
-        controller_type: ide
-        controller_number: 0
-        unit_number: 0
-        state: absent
-      - type: none
-        controller_type: ide
-        controller_number: 1
-        unit_number: 0
-        state: absent
+    cdrom: []
     customization:
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
@@ -78,7 +68,7 @@
     seconds: 15
 
 - name: Reconfigure networking
-  throttle: 1
+  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -93,6 +83,7 @@
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
 
+    cdrom: []
     customization:
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
