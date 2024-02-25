@@ -8,6 +8,7 @@
         dns_servers: "{{ vm_dns_servers | default(omit) }}"
         dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
         domain: "{{ vm_domain | default(omit) }}"
+      datastore: "{{ vm_settings['datastore'] | default(omit) }}"
       disk: "{{ vm_settings['disk'] | default(omit) }}"
       hardware:
         hotadd_cpu: true
@@ -46,6 +47,7 @@
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
       domain: "{{ vm_domain | default(omit) }}"
+    datastore: "{{ vm_settings['datastore'] | default(omit) }}"
     disk: "{{ vm_settings['disk'] | default(omit) }}"
     hardware:
       hotadd_cpu: true
@@ -84,10 +86,6 @@
     folder: "{{ vm_folder }}"
 
     cdrom: []
-    customization:
-      dns_servers: "{{ vm_dns_servers | default(omit) }}"
-      dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-      domain: "{{ vm_domain | default(omit) }}"
     networks:
       - start_connected: true
         connected: true
