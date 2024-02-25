@@ -2,7 +2,7 @@
 
 - name: Show settings
   ansible.builtin.debug:
-    # verbosity: 1
+    verbosity: 1
     msg:
       customization:
         dns_servers: "{{ vm_dns_servers | default(omit) }}"
@@ -24,8 +24,6 @@
           netmask: "{{ vm_netmask | default(omit) }}"
           gateway: "{{ vm_gateway | default(omit) }}"
           mac: "{{ vm_mac | default(omit) }}"
-
-- fail: msg=xxx
 
 - name: Deploy VM from template
   throttle: "{{ vmware_parallel_deployments }}"
