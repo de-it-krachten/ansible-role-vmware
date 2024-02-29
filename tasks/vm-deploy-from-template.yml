@@ -19,6 +19,14 @@
 
     cdrom: []
     datastore: "{{ vm_settings['datastore'] | default(omit) }}"
+    disk: "{{ vm_settings['disk'] | default(omit) }}"
+    hardware:
+      hotadd_cpu: true
+      hotadd_memory: true
+      memory_mb: "{{ vm_memory | default(4096) | int }}"
+      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
+      num_cpus: "{{ vm_cpu | default(2) | int }}"
+      secure_boot: true
 
 - name: Wait for 15 seconds
   ansible.builtin.pause:
@@ -45,14 +53,6 @@
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
       domain: "{{ vm_domain | default(omit) }}"
       existing_vm: true
-    disk: "{{ vm_settings['disk'] | default(omit) }}"
-    hardware:
-      hotadd_cpu: true
-      hotadd_memory: true
-      memory_mb: "{{ vm_memory | default(4096) | int }}"
-      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
-      num_cpus: "{{ vm_cpu | default(2) | int }}"
-      secure_boot: true
     networks:
       - start_connected: true
         connected: true
