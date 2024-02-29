@@ -1,30 +1,5 @@
 ---
 
-- name: Show settings
-  ansible.builtin.debug:
-    verbosity: 1
-    msg:
-      customization:
-        dns_servers: "{{ vm_dns_servers | default(omit) }}"
-        dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-        domain: "{{ vm_domain | default(omit) }}"
-      datastore: "{{ vm_settings['datastore'] | default(omit) }}"
-      disk: "{{ vm_settings['disk'] | default(omit) }}"
-      hardware:
-        hotadd_cpu: true
-        hotadd_memory: true
-        memory_mb: "{{ vm_memory | default(4096) | int }}"
-        num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
-        num_cpus: "{{ vm_cpu | default(2) | int }}"
-      networks:
-        - start_connected: true
-          connected: true
-          name: "{{ vm_portgroup | default(omit) }}"
-          ip: "{{ vm_ip | default(omit) }}"
-          netmask: "{{ vm_netmask | default(omit) }}"
-          gateway: "{{ vm_gateway | default(omit) }}"
-          mac: "{{ vm_mac | default(omit) }}"
-
 - name: Deploy VM from template
   throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
@@ -43,33 +18,13 @@
     template: "{{ vm_template }}"
 
     cdrom: []
-    customization:
-      dns_servers: "{{ vm_dns_servers | default(omit) }}"
-      dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-      domain: "{{ vm_domain | default(omit) }}"
     datastore: "{{ vm_settings['datastore'] | default(omit) }}"
-    disk: "{{ vm_settings['disk'] | default(omit) }}"
-    hardware:
-      hotadd_cpu: true
-      hotadd_memory: true
-      memory_mb: "{{ vm_memory | default(4096) | int }}"
-      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
-      num_cpus: "{{ vm_cpu | default(2) | int }}"
-      secure_boot: true
-    networks:
-      - start_connected: true
-        connected: true
-        name: "{{ vm_portgroup | default(omit) }}"
-        ip: "{{ vm_ip | default(omit) }}"
-        netmask: "{{ vm_netmask | default(omit) }}"
-        gateway: "{{ vm_gateway | default(omit) }}"
-        mac: "{{ vm_mac | default(omit) }}"
 
 - name: Wait for 15 seconds
   ansible.builtin.pause:
     seconds: 15
 
-- name: Reconfigure networking
+- name: Reconfigure disk / networking / customization
   throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
@@ -85,7 +40,19 @@
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
 
-    cdrom: []
+    customization:
+      dns_servers: "{{ vm_dns_servers | default(omit) }}"
+      dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
+      domain: "{{ vm_domain | default(omit) }}"
+      existing_vm: true
+    disk: "{{ vm_settings['disk'] | default(omit) }}"
+    hardware:
+      hotadd_cpu: true
+      hotadd_memory: true
+      memory_mb: "{{ vm_memory | default(4096) | int }}"
+      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
+      num_cpus: "{{ vm_cpu | default(2) | int }}"
+      secure_boot: true
     networks:
       - start_connected: true
         connected: true
