@@ -27,6 +27,7 @@
       num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
       num_cpus: "{{ vm_cpu | default(2) | int }}"
       secure_boot: true
+    networks: []
 
 - name: Wait for 15 seconds
   ansible.builtin.pause:
