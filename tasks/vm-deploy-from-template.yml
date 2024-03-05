@@ -53,7 +53,8 @@
       dns_servers: "{{ vm_dns_servers | default(omit) }}"
       dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
       domain: "{{ vm_domain | default(omit) }}"
-      existing_vm: true
+      existing_vm: "{{ vm_customization | default(False) }}"
+      hostname: "{{ vm_hostname | lower | default(omit) }}"
     networks:
       - start_connected: true
         connected: true
