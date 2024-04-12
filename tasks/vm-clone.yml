@@ -1,0 +1,24 @@
+---
+
+- name: Show vm settings
+  ansible.builtin.debug:
+    msg:
+      name: "{{ vm_name }}"
+      guest_id: "{{ vm_settings['guest_id'] }}"
+      folder: "{{ vm_folder }}"
+
+- name: Instant Clone VM
+  community.vmware.vmware_guest_instant_clone:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    datacenter: "{{ vm_datacenter }}"
+    host: "{{ vm_host }}"
+    folder: "{{ vm_folder }}"
+    name: "{{ vm_clone }}"
+    parent_vm: "{{ vm_name }}"
+    datastore: "{{ vm_datastore }}"

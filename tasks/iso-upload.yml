@@ -1,0 +1,29 @@
+---
+
+- name: Assertions
+  ansible.builtin.assert:
+    that:
+      - vmware_iso_file is defined
+      - vmware_iso_ds_name is defined
+      - vmware_iso_ds_path is defined
+
+- name: Show settings
+  ansible.builtin.debug:
+    msg:
+      vmware_iso_file: "{{ vmware_iso_file }}"
+      vmware_iso_ds_name: "{{ vmware_iso_ds_name }}"
+      vmware_iso_ds_path: "{{ vmware_iso_ds_path }}"
+
+- name: Push {{ vmware_iso_file }} to VMware datastore  # noqa name[template]
+  community.vmware.vsphere_copy:
+    hostname: "{{ vcenter_hostname }}"
+    port: "{{ vcenter_port | default(omit) }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ vcenter_validate_certs }}"
+    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    src: "{{ vmware_iso_file }}"
+    datastore: "{{ vmware_iso_ds_name }}"
+    path: "{{ vmware_iso_ds_path }}"

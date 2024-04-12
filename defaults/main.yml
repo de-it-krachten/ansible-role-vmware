@@ -1,0 +1,51 @@
+---
+
+# Upload iso images to vcenter
+vm_iso_upload: false
+
+# Delete the VM before creating the image
+vm_destroy: yes
+
+# Create the VM before creating the image
+vm_create: yes
+
+# Convert vm into a template
+vm_template: yes
+
+# Startup
+vm_startup: no
+
+# Type of ISO file to use
+vm_iso_type: 'autoinstall'
+
+# Amount of VM deployment in parallel
+vmware_parallel_deployments: 1
+
+# vm_name: template-ubuntu2204
+# vm_guest_id: ubuntu64Guest
+vm_folder: /templates
+
+vm_settings:
+  guest_id: "{{ vm_guest_id }}"
+  disk:
+    - size_gb: 60
+      type: thick
+      autoselect_datastore: true
+      # datastore: "{{ vm_datastore }}"
+  cdrom: []
+  # cdrom:
+  #   - type: none
+  #     controller_type: ide
+  #      controller_number: 0
+  #      unit_number: 0
+  hardware:
+    memory_mb: 2048
+    num_cpus: 2
+    boot_firmware: efi
+    secure_boot: true
+  networks:
+    - connected: yes
+      device_type: vmxnet3
+      start_connected: yes
+      type: static
+      name: "{{ vm_vnet }}"

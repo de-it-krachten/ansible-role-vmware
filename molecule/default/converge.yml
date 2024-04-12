@@ -1,0 +1,9 @@
+---
+
+- name: Converge
+  hosts: all
+  become: "yes"
+  tasks:
+    - name: No need to execute code without VMWare
+      ansible.builtin.debug:
+        msg: "Nothing to do here"

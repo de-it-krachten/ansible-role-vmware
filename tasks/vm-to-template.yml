@@ -1,0 +1,54 @@
+---
+
+- name: Set Set-PowerCLIConfiguration
+  ansible.builtin.shell: |
+    Set-PowerCLIConfiguration -Scope AllUsers -InvalidCertificateAction:Ignore -Confirm:$false
+    Set-PowerCLIConfiguration -Scope AllUsers -ParticipateInCEIP $false -Confirm:$false
+  changed_when: false
+  args:
+    executable: /usr/bin/pwsh
+  become: yes
+
+- name: Convert VM to template  # noqa risky-shell-pipe
+  ansible.builtin.shell: |
+    $ErrorActionPreference = 'SilentlyContinue'
+    Connect-VIServer -Server {{ vcenter_hostname }} -User $env:VMWARE_USER -Password $env:VMWARE_PASSWORD
+    Get-VM -Name {{ vm_name }} | Set-VM -ToTemplate -Confirm:$false
+    exit 0
+  args:
+    executable: /usr/bin/pwsh
+  environment:
+    VMWARE_USER: "{{ vcenter_username | default(vcenter_username) }}"
+    VMWARE_PASSWORD: "{{ vcenter_password | default(vcenter_password) }}"
+  changed_when: true
+
+- name: Release new template  # noqa risky-shell-pipe
+  when: template_release is defined and template_release | bool
+  block:
+
+    - name: Delete the template if it exists
+      ansible.builtin.shell: |
+        $ErrorActionPreference = 'SilentlyContinue'
+        Connect-VIServer -Server {{ vcenter_hostname }} -User $env:VMWARE_USER -Password $env:VMWARE_PASSWORD
+        Get-Template {{ template_name }} | Remove-Template -Confirm:$false
+        exit 0
+      args:
+        executable: /usr/bin/pwsh
+      environment:
+        VMWARE_USER: "{{ vcenter_username1 | default(vcenter_username) }}"
+        VMWARE_PASSWORD: "{{ vcenter_password1 | default(vcenter_password) }}"
+      changed_when: true
+
+    - name: Copy intermediate template to final template  # noqa risky-shell-pipe
+      ansible.builtin.shell: |
+        $ErrorActionPreference = 'SilentlyContinue'
+        Connect-VIServer -Server {{ vcenter_hostname }} -User $env:VMWARE_USER -Password $env:VMWARE_PASSWORD
+        Get-Template {{ vm_name }} | Set-Template -Name {{ template_name }} -Confirm:$false
+        # New-Template -Name {{ template_name }} -Template {{ vm_name }} -Confirm:$false
+        exit 0
+      args:
+        executable: /usr/bin/pwsh
+      environment:
+        VMWARE_USER: "{{ vcenter_username1 | default(vcenter_username) }}"
+        VMWARE_PASSWORD: "{{ vcenter_password1 | default(vcenter_password) }}"
+      changed_when: true
