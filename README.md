@@ -105,7 +105,7 @@ vm_settings:
   hosts: all
   become: 'yes'
   tasks:
-    - name: Include role 'vmware'
-      ansible.builtin.include_role:
-        name: vmware
+    - name: No need to execute code without VMWare
+      ansible.builtin.debug:
+        msg: Nothing to do here
 </pre></code>

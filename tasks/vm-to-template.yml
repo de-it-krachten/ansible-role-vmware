@@ -4,6 +4,7 @@
   ansible.builtin.shell: |
     Set-PowerCLIConfiguration -Scope AllUsers -InvalidCertificateAction:Ignore -Confirm:$false
     Set-PowerCLIConfiguration -Scope AllUsers -ParticipateInCEIP $false -Confirm:$false
+  changed_when: false
   args:
     executable: /usr/bin/pwsh
   become: yes

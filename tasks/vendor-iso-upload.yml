@@ -6,6 +6,7 @@
     dest: "{{ management_server_iso_location }}/{{ item.url | basename }}"
     checksum: "{{ item.checksum }}"
     tmp_dest: "{{ management_server_iso_location }}"
+    mode: "0640"
   loop: "{{ vm_templates }}"
 
 - name: Copy file into datastore

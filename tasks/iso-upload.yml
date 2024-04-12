@@ -14,7 +14,7 @@
       vmware_iso_ds_name: "{{ vmware_iso_ds_name }}"
       vmware_iso_ds_path: "{{ vmware_iso_ds_path }}"
 
-- name: Push {{ vmware_iso_file }} to VMware datastore
+- name: Push {{ vmware_iso_file }} to VMware datastore  # noqa name[template]
   community.vmware.vsphere_copy:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
