@@ -16,6 +16,6 @@
 
 - name: Wait for VM to be responsive
   ansible.builtin.wait_for:
-    host: "{{ hostvars[vm_name]['ansible_host'] }}"
+    host: "{{ vm_ip }}"
     port: 22
-  when: jumphost is undefined
+    timeout: 600

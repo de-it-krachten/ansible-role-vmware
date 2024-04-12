@@ -113,7 +113,7 @@
     boot_order:
       - disk
 
-- name: Disconnect ISO images and remove 2nd DVD
+- name: Remove all DVD drives
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -131,6 +131,7 @@
         controller_type: ide
         controller_number: 0
         unit_number: 0
+        state: absent
       - type: none
         controller_type: ide
         controller_number: 1
@@ -138,16 +139,6 @@
         state: absent
 
 - name: Power-on the VM
-  community.vmware.vmware_guest:
-    hostname: "{{ vcenter_hostname }}"
-    port: "{{ vcenter_port | default(omit) }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    validate_certs: "{{ vcenter_validate_certs }}"
-    proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
-    proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
-
-    datacenter: "{{ vm_datacenter | default(omit) }}"
-    name: "{{ vm_name }}"
-    state: poweredon
+  ansible.builtin.include_tasks:
+    file: vm-poweron.yml
   when: vm_startup | bool

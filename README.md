@@ -13,7 +13,7 @@ Manage VMWare resources like templates, vms etc
 None
 
 #### Collections
-- {'name': 'community.vmware'}
+- community.vmware
 
 ## Platforms
 
@@ -59,7 +59,11 @@ vm_template: yes
 # Startup
 vm_startup: no
 
+# Type of ISO file to use
 vm_iso_type: 'autoinstall'
+
+# Amount of VM deployment in parallel
+vmware_parallel_deployments: 1
 
 # vm_name: template-ubuntu2204
 # vm_guest_id: ubuntu64Guest
@@ -69,14 +73,15 @@ vm_settings:
   guest_id: "{{ vm_guest_id }}"
   disk:
     - size_gb: 60
-      type: thin
+      type: thick
       autoselect_datastore: true
       # datastore: "{{ vm_datastore }}"
-  cdrom:
-    - type: none
-      controller_type: ide
-      controller_number: 0
-      unit_number: 0
+  cdrom: []
+  # cdrom:
+  #   - type: none
+  #     controller_type: ide
+  #      controller_number: 0
+  #      unit_number: 0
   hardware:
     memory_mb: 2048
     num_cpus: 2
@@ -100,7 +105,7 @@ vm_settings:
   hosts: all
   become: 'yes'
   tasks:
-    - name: Include role 'vmware'
-      ansible.builtin.include_role:
-        name: vmware
+    - name: No need to execute code without VMWare
+      ansible.builtin.debug:
+        msg: Nothing to do here
 </pre></code>
