@@ -26,21 +26,8 @@
       hostname: "{{ vm_hostname | default(omit) }}"
     datastore: "{{ vm_settings['datastore'] | default(omit) }}"
     disk: "{{ vm_settings['disk'] | default(omit) }}"
-    hardware:
-      hotadd_cpu: true
-      hotadd_memory: true
-      memory_mb: "{{ vm_memory | default(4096) | int }}"
-      num_cpu_cores_per_socket: "{{ vm_cpu_cores_per_socket | default(1) | int }}"
-      num_cpus: "{{ vm_cpu | default(2) | int }}"
-      secure_boot: true
-    networks:
-      - start_connected: true
-        connected: true
-        name: "{{ vm_portgroup | default(omit) }}"
-        ip: "{{ vm_ip | default(omit) }}"
-        netmask: "{{ vm_netmask | default(omit) }}"
-        gateway: "{{ vm_gateway | default(omit) }}"
-        mac: "{{ vm_mac | default(omit) }}"
+    hardware: "{{ vmware_vm_settings['hardware'] | combine(vm_settings['hardware'], recursive=true) }}"
+    networks: "{{ vm_settings['networks'] }}"
 
 - name: Wait for 15 seconds
   ansible.builtin.pause:
@@ -68,11 +55,4 @@
       domain: "{{ vm_domain | default(omit) }}"
       existing_vm: "{{ vm_customization | default(False) }}"
       hostname: "{{ vm_hostname | default(omit) }}"
-    networks:
-      - start_connected: true
-        connected: true
-        name: "{{ vm_portgroup | default(omit) }}"
-        ip: "{{ vm_ip | default(omit) }}"
-        netmask: "{{ vm_netmask | default(omit) }}"
-        gateway: "{{ vm_gateway | default(omit) }}"
-        mac: "{{ vm_mac | default(omit) }}"
+    networks: "{{ vm_settings['networks'] }}"
