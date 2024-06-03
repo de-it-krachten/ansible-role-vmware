@@ -35,8 +35,9 @@ Supported platforms
 - Debian 12 (Bookworm)
 - Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
-- Fedora 37
-- Fedora 38
+- Ubuntu 24.04 LTS
+- Fedora 39
+- Fedora 40
 
 Note:
 <sup>1</sup> : no automated testing is performed on these platforms
@@ -65,11 +66,17 @@ vm_iso_type: 'autoinstall'
 # Amount of VM deployment in parallel
 vmware_parallel_deployments: 1
 
+# Name of the VM
 # vm_name: template-ubuntu2204
+
+# VM guest ID (OS-type)
 # vm_guest_id: ubuntu64Guest
+
+# Folder to put VM/Template into
 vm_folder: /templates
 
-vm_settings:
+# VM settings
+vmware_vm_settings:
   guest_id: "{{ vm_guest_id }}"
   disk:
     - size_gb: 60
@@ -83,8 +90,15 @@ vm_settings:
   #      controller_number: 0
   #      unit_number: 0
   hardware:
-    memory_mb: 2048
+    # CPU
     num_cpus: 2
+    # num_cpu_cores_per_socket: 1
+    hotadd_cpu: true
+    # Memory
+    memory_mb: 2048
+    memory_reservation_lock: true
+    hotadd_memory: true
+    # boot
     boot_firmware: efi
     secure_boot: true
   networks:
@@ -93,6 +107,9 @@ vm_settings:
       start_connected: yes
       type: static
       name: "{{ vm_vnet }}"
+
+# IP for connectivity tests
+vm_ip: "{{ ansible_host }}"
 </pre></code>
 
 
