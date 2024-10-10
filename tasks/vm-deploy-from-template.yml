@@ -12,7 +12,8 @@
     proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
 
     datacenter: "{{ vm_datacenter | default(omit) }}"
-    cluster: "{{ vm_cluster | default(omit) }}"
+    cluster: "{{ vm_cluster if vm_host is undefined else omit }}"
+    esxi_hostname: "{{ vm_host | default(omit) }}"
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
     template: "{{ vm_template }}"
@@ -45,7 +46,8 @@
     proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
 
     datacenter: "{{ vm_datacenter | default(omit) }}"
-    cluster: "{{ vm_cluster | default(omit) }}"
+    cluster: "{{ vm_cluster if vm_host is undefined else omit }}"
+    esxi_hostname: "{{ vm_host | default(omit) }}"
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
 
@@ -56,3 +58,16 @@
       existing_vm: "{{ vm_customization | default(False) }}"
       hostname: "{{ vm_hostname | default(omit) }}"
     networks: "{{ vm_settings['networks'] }}"
+
+- name: Add vGPU profile to VM
+  throttle: "{{ vmware_parallel_deployments }}"
+  community.vmware.vmware_guest_vgpu:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ vm_datacenter | default(omit) }}"
+    validate_certs: false
+    name: "{{ vm_name }}"
+    vgpu: "{{ vm_settings['vgpu'] }}"
+    state: present
+  when: vm_settings['vgpu'] | default('') | length > 0
