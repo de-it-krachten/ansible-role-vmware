@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.1.0...v1.2.0) (2024-10-11)
+
+
+### Features
+
+* Add support for VM deployment on specific ESXi host ([9bd4f6a](https://github.com/de-it-krachten/ansible-role-vmware/commit/9bd4f6aeeb8ece00a84769c327ece1dec5d90744))
+* Add support for VM deployment with vGPU ([c8f4fe7](https://github.com/de-it-krachten/ansible-role-vmware/commit/c8f4fe7612cf6c28ac208e09ef52eef65d6ea0f3))
+
 # [1.1.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.0.0...v1.1.0) (2024-06-03)
 
 
