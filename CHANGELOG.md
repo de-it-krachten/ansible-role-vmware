@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.2.0...v1.3.0) (2024-12-29)
+
+
+### Features
+
+* Update supported platforms & CI ([b6cc049](https://github.com/de-it-krachten/ansible-role-vmware/commit/b6cc04988bc48789599f6708f23aaddc4362ce08))
+
 # [1.2.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.1.0...v1.2.0) (2024-10-11)
 
 
