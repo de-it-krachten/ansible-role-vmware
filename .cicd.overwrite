@@ -8,6 +8,12 @@ generic:
     Manage VMWare resources like templates, vms etc
   collections: []
 
+# Supported platforms
+platforms:
+  ubuntu2004:
+    supported: true
+    ci: true
+
 molecule:
   requirements:
     roles_extra: []
