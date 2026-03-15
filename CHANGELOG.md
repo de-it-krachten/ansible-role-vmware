@@ -1,3 +1,13 @@
+# [1.5.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.4.0...v1.5.0) (2026-03-15)
+
+
+### Features
+
+* Added support for Fedora 43 ([b7afd7e](https://github.com/de-it-krachten/ansible-role-vmware/commit/b7afd7e3a2b84a72c8e10983312eb843033889ec))
+* Drop support for Fedora 41 ([a1cf44c](https://github.com/de-it-krachten/ansible-role-vmware/commit/a1cf44c108f9a2465a9bd9064cd98c505a6b8083))
+* Drop support for openSUSE Leap 15 ([b1f5ed3](https://github.com/de-it-krachten/ansible-role-vmware/commit/b1f5ed3c33aaa262593f859412410cd96158d8bb))
+* Drop support for SUSE Linux Enterprise 15 ([031852a](https://github.com/de-it-krachten/ansible-role-vmware/commit/031852a2c210f56b864523e4ec2ad81a12689655))
+
 # [1.4.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.3.0...v1.4.0) (2025-08-07)
 
 
