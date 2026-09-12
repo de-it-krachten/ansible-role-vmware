@@ -30,6 +30,12 @@ vmware_parallel_deployments: 1
 # Folder to put VM/Template into
 vm_folder: /templates
 
+# IDE controller & unit
+vm_cdrom1_controller: 0
+vm_cdrom1_unit: 0
+vm_cdrom2_controller: 1
+vm_cdrom2_unit: 0
+
 # VM settings
 vmware_vm_settings:
   guest_id: "{{ vm_guest_id }}"
