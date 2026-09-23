@@ -1,0 +1,11 @@
+#cloud-config
+# keep SSH host keys when instance-id changes
+ssh_deletekeys: false
+bootcmd:
+  # drop installer netplan so it doesn't merge with 50-cloud-init.yaml
+  - [sh, -c, 'if [ -f /etc/netplan/00-installer-config.yaml ]; then rm -f /etc/netplan/00-installer-config.yaml; netplan apply; fi']
+write_files:
+  - path: /etc/cloud/cloud.cfg.d/90-vmware-guestinfo.cfg
+    permissions: '0644'
+    content: |
+      datasource_list: [VMware, None]

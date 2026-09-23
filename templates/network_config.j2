@@ -1,0 +1,23 @@
+{% set ip = vm_settings['networking']['ip'] %}
+{% set gw = vm_settings['networking']['gateway'] %}
+{% set cidr = vm_settings['networking']['cidr'] %}
+{% set ns = vm_settings['networking']['dns_servers'] %}
+{% set domain = vm_settings['networking']['domain'] %}
+{% set search = vm_settings['networking']['search'] | default([domain]) %}
+
+network:
+  version: 2
+  ethernets:
+    nic0:
+      match:
+        macaddress: "{{ vm_mac }}"
+      dhcp4: false
+      dhcp6: false
+      addresses:
+        - '{{ ip }}/{{ cidr }}'
+      routes:
+        - to: default
+          via: {{ gw }}
+      nameservers:
+        addresses: {{ ns }}
+        search: {{ search }}
