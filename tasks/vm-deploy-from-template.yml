@@ -1,7 +1,14 @@
 ---
 
+- name: Show settings
+  ansible.builtin.debug:
+    msg:
+      datastore: "{{ vm_settings['datastore'] | default(omit) }}"
+      disk: "{{ vm_settings['disk'] | default(omit) }}"
+      hardware: "{{ vmware_vm_settings['hardware'] | combine(vm_settings['hardware'], recursive=true) }}"
+      networks: "{{ vm_settings['networks'] }}"
+
 - name: Deploy VM from template
-  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -13,29 +20,24 @@
 
     datacenter: "{{ vm_datacenter | default(omit) }}"
     cluster: "{{ vm_cluster if vm_host is undefined else omit }}"
+    resource_pool: "{{ vm_resource_pool | default(omit) }}"
     esxi_hostname: "{{ vm_host | default(omit) }}"
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
     template: "{{ vm_template }}"
 
     cdrom: []
-    customization:
-      dns_servers: "{{ vm_dns_servers | default(omit) }}"
-      dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-      domain: "{{ vm_domain | default(omit) }}"
-      existing_vm: "{{ vm_customization | default(False) }}"
-      hostname: "{{ vm_hostname | default(omit) }}"
     datastore: "{{ vm_settings['datastore'] | default(omit) }}"
-    disk: "{{ vm_settings['disk'] | default(omit) }}"
+    # disk: "{{ vm_settings['disk'] | default(omit) }}"
     hardware: "{{ vmware_vm_settings['hardware'] | combine(vm_settings['hardware'], recursive=true) }}"
-    networks: "{{ vm_settings['networks'] }}"
+    # networks: "{{ vm_settings['networks'] }}"
+
 
 - name: Wait for 15 seconds
   ansible.builtin.pause:
     seconds: 15
 
-- name: Reconfigure disk / networking / customization
-  throttle: "{{ vmware_parallel_deployments }}"
+- name: VM disk / networking
   community.vmware.vmware_guest:
     hostname: "{{ vcenter_hostname }}"
     port: "{{ vcenter_port | default(omit) }}"
@@ -51,16 +53,113 @@
     name: "{{ vm_name }}"
     folder: "{{ vm_folder }}"
 
-    customization:
-      dns_servers: "{{ vm_dns_servers | default(omit) }}"
-      dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
-      domain: "{{ vm_domain | default(omit) }}"
-      existing_vm: "{{ vm_customization | default(False) }}"
-      hostname: "{{ vm_hostname | default(omit) }}"
+    disk: "{{ vm_settings['disk'] | default(omit) }}"
     networks: "{{ vm_settings['networks'] }}"
 
+- name: VM customization (vmware-native)
+  when: not vmware_cloud_init | bool
+  block:
+
+    - name: Set VM customization
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        port: "{{ vcenter_port | default(omit) }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: "{{ vcenter_validate_certs }}"
+        proxy_host: "{{ vcenter_proxy_host | default(omit) }}"
+        proxy_port: "{{ vcenter_proxy_port | default(omit) }}"
+
+        name: "{{ vm_name }}"
+        customization:
+          dns_servers: "{{ vm_dns_servers | default(omit) }}"
+          dns_suffix: "{{ vm_dns_suffix | default(omit) }}"
+          domain: "{{ vm_domain | default(omit) }}"
+          existing_vm: "{{ vm_customization | default(False) }}"
+          hostname: "{{ vm_hostname | default(omit) }}"
+
+- name: VM customization (cloud-init)
+  when: vmware_cloud_init | bool
+  block:
+
+    - name: Get VM info
+      community.vmware.vmware_guest_info:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "{{ vm_datacenter }}"
+        validate_certs: false
+        name: "{{ vm_name }}"
+      register: vm_info
+
+    - name: Derive MAC
+      ansible.builtin.set_fact:
+        vm_mac: "{{ vm_info.instance.hw_eth0.macaddress }}"
+
+    - name: Derive instance-id
+      ansible.builtin.set_fact:
+        # New instance-id whenever network config changes -> cloud-init re-applies it.
+        # Unchanged config -> same id -> nothing re-runs.
+        vm_instance_id: >-
+          {{ vm_info.instance.instance_uuid }}-{{
+             (lookup('template', 'network_config.j2') | to_json | hash('sha1'))[:10] }}
+
+    - name: Build metadata
+      ansible.builtin.set_fact:
+        vm_metadata:
+          instance-id: "{{ vm_instance_id }}"
+          local-hostname: "{{ vm_name }}"
+          network: "{{ lookup('template', 'network_config.j2') }}"
+
+    - name: Shut down guest cleanly
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "{{ vm_datacenter }}"
+        name: "{{ vm_name }}"
+        state: shutdown-guest
+        state_change_timeout: 300
+      when: vm_info.instance.hw_power_status == 'poweredOn'
+
+    - name: Show cloud-init network settings
+      ansible.builtin.debug:
+        msg: "{{ lookup('template', 'network_config.j2') | from_yaml }}"
+
+    - name: Write guestinfo attributes
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "{{ vm_datacenter }}"
+        name: "{{ vm_name }}"
+        advanced_settings:
+          - key: guestinfo.metadata
+            value: "{{ vm_metadata | to_json | b64encode }}"
+          - key: guestinfo.metadata.encoding
+            value: base64
+          - key: guestinfo.userdata
+            value: "{{ lookup('template', 'userdata.j2') | b64encode }}"
+          - key: guestinfo.userdata.encoding
+            value: base64
+
+    - name: Power on VM
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        name: "{{ vm_name }}"
+        state: powered-on
+
+    - name: Wait for VMware Tools
+      community.vmware.vmware_guest_tools_wait:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        name: "{{ vm_name }}"
+        timeout: 300
+
 - name: Add vGPU profile to VM
-  throttle: "{{ vmware_parallel_deployments }}"
   community.vmware.vmware_guest_vgpu:
     hostname: "{{ vcenter_hostname }}"
     username: "{{ vcenter_username }}"

@@ -78,6 +78,12 @@ vmware_parallel_deployments: 1
 # Folder to put VM/Template into
 vm_folder: /templates
 
+# IDE controller & unit
+vm_cdrom1_controller: 0
+vm_cdrom1_unit: 0
+vm_cdrom2_controller: 1
+vm_cdrom2_unit: 0
+
 # VM settings
 vmware_vm_settings:
   guest_id: "{{ vm_guest_id }}"
@@ -99,11 +105,12 @@ vmware_vm_settings:
     hotadd_cpu: true
     # Memory
     memory_mb: 2048
-    memory_reservation_lock: true
+    # memory_reservation_lock: true
     hotadd_memory: true
     # boot
     boot_firmware: efi
     secure_boot: true
+    scsi: paravirtual
   networks:
     - connected: yes
       device_type: vmxnet3
@@ -113,6 +120,9 @@ vmware_vm_settings:
 
 # IP for connectivity tests
 vm_ip: "{{ ansible_host }}"
+
+# VM customization via cloud-init
+vmware_cloud_init: true
 </pre></code>
 
 
