@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.6.0...v1.7.0) (2026-09-24)
+
+
+### Features
+
+* Add support for cloud-init when deploying VM from template ([cf4ba7b](https://github.com/de-it-krachten/ansible-role-vmware/commit/cf4ba7b74cc5be272b2e8b8603a06f9457911467))
+* Make it possible to change CDROM controller/unit ids ([9597586](https://github.com/de-it-krachten/ansible-role-vmware/commit/9597586c05c588621c7badad9c5224c7a26cd70e))
+
 # [1.6.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.5.0...v1.6.0) (2026-07-26)
 
 
