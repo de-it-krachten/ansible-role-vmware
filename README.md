@@ -105,11 +105,12 @@ vmware_vm_settings:
     hotadd_cpu: true
     # Memory
     memory_mb: 2048
-    memory_reservation_lock: true
+    # memory_reservation_lock: true
     hotadd_memory: true
     # boot
     boot_firmware: efi
     secure_boot: true
+    scsi: paravirtual
   networks:
     - connected: yes
       device_type: vmxnet3
@@ -119,6 +120,9 @@ vmware_vm_settings:
 
 # IP for connectivity tests
 vm_ip: "{{ ansible_host }}"
+
+# VM customization via cloud-init
+vmware_cloud_init: true
 </pre></code>
 
 
