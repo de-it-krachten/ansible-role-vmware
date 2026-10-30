@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.7.0...v1.8.0) (2026-10-30)
+
+
+### Features
+
+* Drop support for Debian 11 (Bullseye) ([bb28276](https://github.com/de-it-krachten/ansible-role-vmware/commit/bb28276bb3d6b3f5f94cc8c2cb4c464acce5f0a6))
+
 # [1.7.0](https://github.com/de-it-krachten/ansible-role-vmware/compare/v1.6.0...v1.7.0) (2026-09-24)
 
 
